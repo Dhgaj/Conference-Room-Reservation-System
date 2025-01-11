@@ -46,7 +46,7 @@
 
 ### Mac 用户
 
-[![Mac下载](https://img.shields.io/badge/MacOS-下载程序包-blue?style=for-the-badge&logo=apple)](https://github.com/Dhgaj/Conference-Room-Reservation-System/Releases/会议室预订系统.zip)
+[![Mac下载](https://img.shields.io/badge/MacOS-下载程序包-blue?style=for-the-badge&logo=apple)](https://raw.githubusercontent.com/Dhgaj/Conference-Room-Reservation-System/refs/heads/main/Releases/会议室预订系统.zip)
 
 1. 点击上方按钮下载 `.zip` 压缩包
 2. 解压文件
