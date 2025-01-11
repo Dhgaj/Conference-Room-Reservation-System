@@ -38,7 +38,7 @@
 
 ### Windows 用户
 
-[![Windows下载](https://img.shields.io/badge/Windows-下载程序包-blue?style=for-the-badge&logo=windows)](https://github.com/Dhgaj/Conference-Room-Reservation-System/Releases/会议室预订系统Setup1.0.0.exe.zip)
+[![Windows下载](https://img.shields.io/badge/Windows-下载程序包-blue?style=for-the-badge&logo=windows)](https://raw.githubusercontent.com/Dhgaj/Conference-Room-Reservation-System/refs/heads/main/Releases/会议室预订系统Setup1.0.0.exe.zip)
 
 1. 点击上方按钮下载 `.zip` 压缩包
 2. 解压文件后双击运行安装程序
