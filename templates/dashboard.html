@@ -1,0 +1,77 @@
+{% extends "base.html" %} {% block content %}
+<div class="row">
+  <div class="col-md-12">
+    <h2 class="mb-4">会议室概览</h2>
+
+    <div class="row row-cols-1 row-cols-md-3 g-4">
+      {% for room in rooms %}
+      <div class="col">
+        <div class="card h-100">
+          <div class="card-body d-flex flex-column">
+            <h5 class="card-title">{{ room.name }}</h5>
+            <div class="card-text flex-grow-1">
+              <p class="mb-2">
+                <strong>容纳人数:</strong> {{ room.capacity }}人
+              </p>
+              {% if room.description %}
+              <p class="mb-0"><strong>描述:</strong> {{ room.description }}</p>
+              {% endif %}
+            </div>
+            <div class="mt-3">
+              <!-- 预订会议室按钮 -->
+              <a
+                href="{{ url_for('new_reservation', room_id=room.id) }}"
+                class="btn btn-primary w-100"
+                >预订此会议室</a
+              >
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+
+    <h3 class="mt-5 mb-4">我的预订</h3>
+    <div class="table-responsive">
+      <table class="table table-striped">
+        <thead>
+          <tr>
+            <th>会议室</th>
+            <th>标题</th>
+            <th>开始时间</th>
+            <th>结束时间</th>
+            <th>用途</th>
+            <th>操作</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for reservation in current_user.reservations %}
+          <tr>
+            <td>{{ reservation.room.name }}</td>
+            <td>{{ reservation.title }}</td>
+            <td>{{ reservation.start_time.strftime('%Y-%m-%d %H:%M') }}</td>
+            <td>{{ reservation.end_time.strftime('%Y-%m-%d %H:%M') }}</td>
+            <td>{{ reservation.purpose }}</td>
+            <td>
+              <!-- 编辑预订按钮 -->
+              <a
+                href="{{ url_for('edit_reservation', id=reservation.id) }}"
+                class="btn btn-primary btn-sm">
+                编辑
+              </a>
+              <!-- 取消预订按钮 -->
+              <a
+                href="{{ url_for('cancel_reservation', id=reservation.id) }}"
+                class="btn btn-danger btn-sm"
+                onclick="return confirm('确定要取消这个预订吗？')">
+                取消预订
+              </a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

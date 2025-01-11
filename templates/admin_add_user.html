@@ -1,0 +1,71 @@
+{% extends "base.html" %} {% block content %}
+<div class="container mt-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>添加用户</h2>
+    <!-- 返回控制面板按钮 -->
+    <a
+      href="{{ url_for('dashboard') }}"
+      class="btn btn-secondary"
+      >返回控制面板</a
+    >
+  </div>
+
+  <form method="POST">
+    <div class="mb-3">
+      <!-- 用户名输入框 -->
+      <label
+        for="username"
+        class="form-label"
+        >用户名</label
+      >
+      <input
+        type="text"
+        class="form-control"
+        id="username"
+        name="username"
+        required />
+    </div>
+    <div class="mb-3">
+      <!-- 密码输入框 -->
+      <label
+        for="password"
+        class="form-label"
+        >密码</label
+      >
+      <input
+        type="password"
+        class="form-control"
+        id="password"
+        name="password"
+        required />
+    </div>
+    <div class="mb-3 form-check">
+      <!-- 设为管理员复选框 -->
+      <input
+        type="checkbox"
+        class="form-check-input"
+        id="is_admin"
+        name="is_admin" />
+      <label
+        class="form-check-label"
+        for="is_admin"
+        >设为管理员</label
+      >
+    </div>
+    <div class="mt-4">
+      <!-- 提交按钮 -->
+      <button
+        type="submit"
+        class="btn btn-primary">
+        添加
+      </button>
+      <!-- 返回用户列表按钮 -->
+      <a
+        href="{{ url_for('admin_users') }}"
+        class="btn btn-secondary ms-2"
+        >返回用户列表</a
+      >
+    </div>
+  </form>
+</div>
+{% endblock %}

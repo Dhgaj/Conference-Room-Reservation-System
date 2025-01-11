@@ -1,0 +1,35 @@
+{% extends "base.html" %} {% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-8 text-center">
+    <!-- 标题 -->
+    <h1 class="display-4 mb-4">欢迎使用会议室预订系统</h1>
+    <!-- 描述 -->
+    <p class="lead mb-4">高效管理会议室资源，轻松预约会议空间</p>
+
+    {% if not current_user.is_authenticated %}
+    <!-- 用户未登录时显示登录按钮 -->
+    <div class="d-grid gap-2 col-6 mx-auto">
+      <a
+        href="{{ url_for('login') }}"
+        class="btn btn-primary btn-lg"
+        >立即登录</a
+      >
+    </div>
+    {% else %}
+    <!-- 用户已登录时显示控制面板和预订按钮 -->
+    <div class="d-grid gap-2 col-6 mx-auto">
+      <a
+        href="{{ url_for('dashboard') }}"
+        class="btn btn-primary btn-lg"
+        >进入控制面板</a
+      >
+      <a
+        href="{{ url_for('new_reservation') }}"
+        class="btn btn-success btn-lg"
+        >预订会议室</a
+      >
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

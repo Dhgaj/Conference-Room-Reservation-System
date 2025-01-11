@@ -1,0 +1,232 @@
+{% extends "base.html" %} {% block content %}
+<style>
+  .required::after {
+    content: " *";
+    color: red;
+    font-weight: bold;
+  }
+
+  .time-section {
+    background-color: #f8f9fa;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  }
+
+  .section-title {
+    color: #2c3e50;
+    margin-bottom: 15px;
+    font-size: 1.2rem;
+    font-weight: 600;
+  }
+
+  .form-floating {
+    margin-bottom: 1rem;
+  }
+
+  .info-text {
+    color: #6c757d;
+    font-size: 0.9rem;
+    margin-top: 0.5rem;
+  }
+
+  .btn-submit {
+    width: 100%;
+    padding: 12px;
+    font-size: 1.1rem;
+    margin-top: 20px;
+  }
+</style>
+
+<div class="container mt-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>预订会议室</h2>
+    <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">返回控制面板</a>
+  </div>
+
+  <div class="card shadow-sm">
+    <div class="card-header bg-primary text-white text-center">
+      <h2 class="mb-0">预订会议</h2>
+    </div>
+    <div class="card-body">
+      <form method="POST" id="reservationForm">
+        <!-- 会议标题 -->
+        <div class="time-section">
+          <div class="section-title">会议主题</div>
+          <div class="form-floating">
+            <input type="text" class="form-control form-control-lg" id="title" name="title" required
+              placeholder="请输入会议主题" />
+            <label for="title">请输入会议主题</label>
+          </div>
+        </div>
+
+        <!-- 当前时间显示 -->
+        <div class="time-section">
+          <div class="section-title">当前时间</div>
+          <div id="localTime" class="h4 text-primary"></div>
+        </div>
+
+        <!-- 时间选择区域 -->
+        <div class="time-section">
+          <div class="section-title">时间信息</div>
+          <div class="row">
+            <div class="col-md-6">
+              <div class="form-floating">
+                <input type="datetime-local" class="form-control" id="start_time" name="start_time" required />
+                <label for="start_time">开始时间</label>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="form-floating">
+                <input type="datetime-local" class="form-control" id="end_time" name="end_time" required />
+                <label for="end_time">结束时间</label>
+              </div>
+            </div>
+          </div>
+          <div class="info-text">
+            <i class="fas fa-info-circle"></i>
+            系统会自动在会议前后预留10分钟准备时间
+          </div>
+        </div>
+
+        <!-- 会议室选择区域 -->
+        <div class="time-section">
+          <div class="section-title">会议室选择</div>
+          <select class="form-select form-select-lg" id="room_id" name="room_id" required>
+            <option value="">请选择会议室</option>
+            {% for room in rooms %}
+            <option value="{{ room.id }}">
+              {{ room.name }} (容量: {{ room.capacity }}人)
+            </option>
+            {% endfor %}
+          </select>
+          <div id="roomAvailability" class="info-text mt-2"></div>
+        </div>
+
+        <!-- 会议详情区域 -->
+        <div class="time-section">
+          <div class="section-title">会议详情</div>
+          <div class="form-floating mb-3">
+            <input type="number" class="form-control form-control-lg" id="attendees" name="attendees" min="1" required
+              placeholder="预计参会人数" />
+            <label for="attendees">预计参会人数</label>
+          </div>
+          <div class="form-floating">
+            <textarea class="form-control form-control-lg" id="purpose" name="purpose" style="height: 100px"
+              placeholder="会议用途说明备注"></textarea>
+            <label for="purpose">会议用途说明备注</label>
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-submit">
+          <i class="fas fa-calendar-check"></i> 确认预订
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const startTimeInput = document.getElementById("start_time");
+    const endTimeInput = document.getElementById("end_time");
+    const roomSelect = document.getElementById("room_id");
+    const roomAvailability = document.getElementById("roomAvailability");
+    const localTimeDisplay = document.getElementById("localTime");
+
+    // 设置默认时间
+    function setDefaultTimes() {
+      const now = new Date();
+      const year = now.getFullYear();
+      const month = String(now.getMonth() + 1).padStart(2, "0");
+      const day = String(now.getDate()).padStart(2, "0");
+      const hours = String(now.getHours()).padStart(2, "0");
+      const minutes = String(now.getMinutes()).padStart(2, "0");
+
+      // 设置开始时间为当前时间
+      startTimeInput.value = `${year}-${month}-${day}T${hours}:${minutes}`;
+
+      // 设置结束时间为1小时后
+      const endTime = new Date(now.getTime() + 60 * 60 * 1000);
+      const endHours = String(endTime.getHours()).padStart(2, "0");
+      const endMinutes = String(endTime.getMinutes()).padStart(2, "0");
+      endTimeInput.value = `${year}-${month}-${day}T${endHours}:${endMinutes}`;
+    }
+
+    // 更新本地时间显示
+    function updateLocalTime() {
+      const now = new Date();
+      const year = now.getFullYear();
+      const month = String(now.getMonth() + 1).padStart(2, "0");
+      const day = String(now.getDate()).padStart(2, "0");
+      const hours = String(now.getHours()).padStart(2, "0");
+      const minutes = String(now.getMinutes()).padStart(2, "0");
+      localTimeDisplay.textContent = `${year}-${month}-${day} ${hours}:${minutes}`;
+    }
+
+    // 每秒更新一次时间
+    updateLocalTime();
+    setInterval(updateLocalTime, 1000);
+
+    // 设置默认时间
+    setDefaultTimes();
+
+    function updateRoomAvailability() {
+      const startTime = startTimeInput.value;
+      const endTime = endTimeInput.value;
+      const roomId = roomSelect.value;
+
+      if (startTime && endTime) {
+        fetch(`/available_rooms?start_time=${startTime}&end_time=${endTime}`)
+          .then((response) => response.json())
+          .then((data) => {
+            // 更新所有会议室的选项文本，添加剩余预订数量
+            Array.from(roomSelect.options).forEach((option) => {
+              if (option.value) {
+                // 跳过"请选择会议室"选项
+                const room = data.rooms.find(
+                  (r) => r.id === parseInt(option.value)
+                );
+                // 获取原始会议室名称
+                const baseText = option.textContent.split("(")[0].trim();
+                if (room) {
+                  option.textContent = `${baseText} (容量: ${room.capacity}人, 剩余预订: ${room.available_slots}个)`;
+                } else {
+                  option.textContent = `${baseText} (该时间段已被预订)`;
+                }
+              }
+            });
+
+            // 更新可用性提示
+            if (roomId) {
+              const availableRoom = data.rooms.find(
+                (room) => room.id === parseInt(roomId)
+              );
+              if (availableRoom) {
+                // roomAvailability.innerHTML = `<span class="text-success">✓ 该时间段可用 (剩余预订名额: ${availableRoom.available_slots}个)</span>`;
+                roomAvailability.innerHTML = `<span class="text-success">✓ 该时间段可用</span>`;
+                roomSelect.classList.remove("is-invalid");
+              } else {
+                roomAvailability.innerHTML =
+                  '<span class="text-danger">✗ 该时间段已被预订</span>';
+                roomSelect.classList.add("is-invalid");
+              }
+            } else {
+              roomAvailability.innerHTML = `<span class="text-success">✓ 该时间段有 ${data.rooms.length} 个可用会议室</span>`;
+            }
+          });
+      }
+    }
+
+    // 初始检查会议室可用性
+    if (startTimeInput.value && endTimeInput.value) {
+      updateRoomAvailability();
+    }
+
+    startTimeInput.addEventListener("change", updateRoomAvailability);
+    endTimeInput.addEventListener("change", updateRoomAvailability);
+    roomSelect.addEventListener("change", updateRoomAvailability);
+  });
+</script>
+{% endblock %}

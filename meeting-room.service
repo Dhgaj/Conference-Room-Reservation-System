@@ -1,0 +1,13 @@
+[Unit]
+Description=Gunicorn instance to serve meeting room application
+After=network.target
+
+[Service]
+User=www-data
+Group=www-data
+WorkingDirectory=/var/www/meeting-room-system
+Environment="PATH=/var/www/meeting-room-system/.venv/bin:/usr/local/bin:/usr/bin:/bin"
+ExecStart=/var/www/meeting-room-system/.venv/bin/python -m gunicorn wsgi:app -c gunicorn.conf.py
+
+[Install]
+WantedBy=multi-user.target
