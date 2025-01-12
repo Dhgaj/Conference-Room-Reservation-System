@@ -1,0 +1,84 @@
+{% extends "base.html" %} {% block content %}
+<div class="container mt-4">
+  <!-- 页面标题和按钮 -->
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>用户管理</h2>
+    <div>
+      <!-- 添加用户按钮 -->
+      <a
+        href="{{ url_for('admin_add_user') }}"
+        class="btn btn-primary me-2"
+        >添加用户</a
+      >
+      <!-- 返回控制面板按钮 -->
+      <a
+        href="{{ url_for('dashboard') }}"
+        class="btn btn-secondary"
+        >返回控制面板</a
+      >
+    </div>
+  </div>
+
+  <!-- 用户列表卡片 -->
+  <div class="card shadow-sm">
+    <div class="card-header bg-primary text-white text-center">
+      <h2 class="mb-0">用户列表</h2>
+    </div>
+    <div class="card-body p-4">
+      <div class="table-responsive">
+        <table class="table table-striped">
+          <thead>
+            <tr>
+              <th style="width: 10%">ID</th>
+              <th style="width: 40%">用户名</th>
+              <th style="width: 20%">角色</th>
+              <th style="width: 30%">操作</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for user in users %}
+            <tr>
+              <td>{{ user.id }}</td>
+              <td>{{ user.username }}</td>
+              <td>
+                {% if user.is_admin %}
+                <span class="badge bg-primary">管理员</span>
+                {% else %}
+                <span class="badge bg-secondary">普通用户</span>
+                {% endif %}
+              </td>
+              <td>
+                <div
+                  class="btn-group"
+                  role="group">
+                  <!-- 编辑用户按钮 -->
+                  <a
+                    href="{{ url_for('admin_edit_user', id=user.id) }}"
+                    class="btn btn-sm btn-warning me-2">
+                    <i class="bi bi-pencil"></i> 编辑
+                  </a>
+                  {% if user.id != current_user.id %}
+                  <!-- 删除用户表单 -->
+                  <form
+                    action="{{ url_for('admin_delete_user', id=user.id) }}"
+                    method="POST"
+                    style="display: inline">
+                    <button
+                      type="submit"
+                      class="btn btn-sm btn-danger"
+                      onclick="return confirm('确定要删除此用户吗？')">
+                      <i class="bi bi-trash"></i> 删除
+                    </button>
+                  </form>
+                  {% endif %}
+                </div>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
