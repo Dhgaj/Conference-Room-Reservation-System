@@ -3,7 +3,7 @@
 一个会议室预订管理系统，可高效管理会议室资源。
 
 > [!WARNING]  
-> 现托管于 PythonAnywhere 配置方法见最后  下载的客户端软件暂不可用 
+> 现托管于 PythonAnywhere 配置方法见最后 客户端软件现时已不支持
 
 ## 功能特点
 
@@ -258,57 +258,58 @@
 ## 使用 PythonAnywhere 相关
 
 ### 1. 创建 PythonAnywhere 账号和 Web 应用
-    1. 登录 PythonAnywhere  
-    2. 点击 "Web" 标签  
-    3. 点击 "Add a new web app"  
-    4. 选择您的域名（免费版会是 yourname.
-    pythonanywhere.com）  
-    5. 选择 "Flask" 框架  
-    6. 选择 Python 3.8 或更高版本  
+- 登录 PythonAnywhere  
+* 点击 "Web" 标签  
++ 点击 "Add a new web app"  
+- 选择您的域名（免费版会是 yourname.pythonanywhere.com）  
+* 选择 "Flask" 框架  
++ 选择 Python 3.8 或更高版本  
 
 ### 2. 上传代码
 #### 方法一：使用 Git
 - 在 PythonAnywhere 的 Bash Console 中运行：
-```
-git clone https://github.com/[您的用户名]/[仓库名].git
-```  
+    ```
+    git clone https://github.com/[您的用户名]/[仓库名].git
+    ```  
 #### 方法二：直接上传
 - 在 PythonAnywhere 的 "Files" 页面  
 * 上传您的所有项目文件
 
 ### 3. 配置虚拟环境
 - 在 PythonAnywhere 的 Bash Console 中运行：
-```
-cd [文件目录名]
-python -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
-```
+    ```
+    cd [文件目录名]
+    python -m venv .venv
+    source .venv/bin/activate
+    pip install -r requirements.txt
+    ```
 
 ### 4. 配置 Web 应用设置
 - 在 Web 页面中设置以下内容：
-    - Source code: /home/[您的用户名]/[文件目录名]
-    * Working directory: /home/[您的用户名]/[文件目录名]
-    + Virtual environment: /home/[您的用户名]/[文件目录名]/.venv
+    ```
+    Source code: /home/[您的用户名]/[文件目录名]
+    Working directory: /home/[您的用户名]/[文件目录名]
+    Virtual environment: /home/[您的用户名]/[文件目录名]/.venv
+    ```
 
 ### 5. 配置 WSGI 文件
 - 点击 WSGI configuration file 链接，修改内容为：  
-```
-import sys
-import os
+    ```
+    import sys
+    import os
 
-# 添加应用程序路径
-path = '/home/[您的用户名]/[文件目录名]'
-if path not in sys.path:
-    sys.path.append(path)
+    # 添加应用程序路径
+    path = '/home/[您的用户名]/[文件目录名]'
+    if path not in sys.path:
+        sys.path.append(path)
 
-from app import app as application
+    from app import app as application
 
-# 确保实例文件夹存在
-instance_path = os.path.join(path, 'instance')
-if not os.path.exists(instance_path):
-    os.makedirs(instance_path)
-```
+    # 确保实例文件夹存在
+    instance_path = os.path.join(path, 'instance')
+    if not os.path.exists(instance_path):
+        os.makedirs(instance_path)
+    ```
 
 ### 6. The Last
 - 在 Web 页面点击 "Reload" 按钮
