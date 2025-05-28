@@ -41,7 +41,7 @@
 
 ### Windows 用户
 
-[![Windows下载](https://img.shields.io/badge/Windows-下载程序包-blue?style=for-the-badge&logo=windows)](https://raw.githubusercontent.com/Dhgaj/Conference-Room-Reservation-System/refs/heads/main/Releases/会议室预订系统Setup1.0.0.exe)
+[![Windows下载](https://img.shields.io/badge/Windows-下载程序包-blue?style=for-the-badge&logo=windows)](https://github.com/Dhgaj/Conference-Room-Reservation-System/raw/refs/heads/main/Releases/%E4%BC%9A%E8%AE%AE%E5%AE%A4%E9%A2%84%E8%AE%A2%E7%B3%BB%E7%BB%9FSetup1.0.0.exe?download=)
 
 1. 点击上方按钮下载 `.zip` 压缩包
 2. 解压文件后双击运行安装程序
@@ -49,7 +49,7 @@
 
 ### Mac 用户
 
-[![Mac下载](https://img.shields.io/badge/MacOS-下载程序包-blue?style=for-the-badge&logo=apple)](https://raw.githubusercontent.com/Dhgaj/Conference-Room-Reservation-System/refs/heads/main/Releases/会议室预订系统.zip)
+[![Mac下载](https://img.shields.io/badge/MacOS-下载程序包-blue?style=for-the-badge&logo=apple)](https://github.com/Dhgaj/Conference-Room-Reservation-System/raw/refs/heads/main/Releases/%E4%BC%9A%E8%AE%AE%E5%AE%A4%E9%A2%84%E8%AE%A2%E7%B3%BB%E7%BB%9F.zip?download=)
 
 1. 点击上方按钮下载 `.zip` 压缩包
 2. 解压文件
