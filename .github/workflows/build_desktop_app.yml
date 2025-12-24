@@ -41,6 +41,7 @@ jobs:
         run: npm install -g nativefier
 
       - name: Build Desktop App
+        shell: bash
         run: |
           nativefier "https://liansifanfan.pythonanywhere.com" \
             --name "会议室预订系统" \
