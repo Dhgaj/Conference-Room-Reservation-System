@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" fill="none">
+  <!-- 背景圆形 -->
+  <circle cx="64" cy="64" r="60" fill="#4F46E5"/>
+  
+  <!-- 会议桌 -->
+  <rect x="28" y="58" width="72" height="24" rx="4" fill="#ffffff"/>
+  
+  <!-- 椅子（上排） -->
+  <rect x="36" y="42" width="12" height="12" rx="3" fill="#A5B4FC"/>
+  <rect x="58" y="42" width="12" height="12" rx="3" fill="#A5B4FC"/>
+  <rect x="80" y="42" width="12" height="12" rx="3" fill="#A5B4FC"/>
+  
+  <!-- 椅子（下排） -->
+  <rect x="36" y="86" width="12" height="12" rx="3" fill="#A5B4FC"/>
+  <rect x="58" y="86" width="12" height="12" rx="3" fill="#A5B4FC"/>
+  <rect x="80" y="86" width="12" height="12" rx="3" fill="#A5B4FC"/>
+  
+  <!-- 日历标记 -->
+  <circle cx="100" cy="28" r="18" fill="#10B981"/>
+  <text x="100" y="34" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="white" text-anchor="middle">✓</text>
+</svg>

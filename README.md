@@ -1,3 +1,7 @@
+<p align="center">
+  <img src=".github/logo.svg" alt="会议室预约系统" width="128" height="128">
+</p>
+
 # Conference Room Reservation System （会议室管理系统）
 
 一个会议室预订管理系统，可高效管理会议室资源。

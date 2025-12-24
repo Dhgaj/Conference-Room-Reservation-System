@@ -1,0 +1,78 @@
+name: Build Desktop App
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/build_desktop_app.yml'
+      - 'static/**'
+  release:
+    types: [published]
+  workflow_dispatch:
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        include:
+          - platform: windows
+            os: windows-latest
+            icon: static/favicon.ico
+            ext: exe
+          - platform: darwin
+            os: macos-latest
+            icon: static/favicon.icns
+            ext: app
+
+    runs-on: ${{ matrix.os }}
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Nativefier
+        run: npm install -g nativefier
+
+      - name: Build Desktop App
+        run: |
+          nativefier "https://liansifanfan.pythonanywhere.com" \
+            --name "会议室预订系统" \
+            --icon "${{ matrix.icon }}" \
+            --platform "${{ matrix.platform }}" \
+            --arch x64 \
+            --electron-version 28.0.0 \
+            --single-instance \
+            --internal-urls ".*liansifanfan\.pythonanywhere\.com.*" \
+            --user-agent "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36" \
+            --clear-cache \
+            --file-download-options '{"saveAs": true}' \
+            --output dist
+
+      - name: Archive artifacts (Windows)
+        if: matrix.platform == 'windows'
+        run: |
+          Compress-Archive -Path "dist\会议室预订系统-win32-x64" -DestinationPath "会议室预订系统-windows-x64.zip"
+
+      - name: Archive artifacts (macOS)
+        if: matrix.platform == 'darwin'
+        run: |
+          cd dist
+          zip -r "../会议室预订系统-macos-x64.zip" "会议室预订系统-darwin-x64"
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: desktop-app-${{ matrix.platform }}
+          path: 会议室预订系统-*.zip
+
+      - name: Publish to Release
+        if: github.event_name == 'release'
+        uses: softprops/action-gh-release@v2
+        with:
+          files: 会议室预订系统-*.zip
