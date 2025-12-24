@@ -54,16 +54,40 @@ jobs:
             --file-download-options '{"saveAs": true}' \
             --output dist
 
+      - name: List build output
+        run: |
+          echo "Current directory:"
+          ls -la
+          echo "Dist directory contents:"
+          ls -la dist || echo "dist directory not found"
+        shell: bash
+
       - name: Archive artifacts (Windows)
         if: matrix.platform == 'windows'
         run: |
-          Compress-Archive -Path "dist\会议室预订系统-win32-x64" -DestinationPath "会议室预订系统-windows-x64.zip"
+          # 查找实际生成的 app 目录
+          $appDir = Get-ChildItem -Path "dist" -Directory | Where-Object { $_.Name -like "*win32*" } | Select-Object -First 1
+          if (-not $appDir) {
+            Write-Host "Error: Cannot find win32 app directory in dist"
+            Get-ChildItem -Path "dist"
+            exit 1
+          }
+          Write-Host "Found app directory: $($appDir.FullName)"
+          Compress-Archive -Path $appDir.FullName -DestinationPath "会议室预订系统-windows-x64.zip"
 
       - name: Archive artifacts (macOS)
         if: matrix.platform == 'darwin'
         run: |
+          # 查找实际生成的 app 目录
+          APP_DIR=$(find dist -maxdepth 1 -type d -name "*darwin*" | head -1)
+          if [ -z "$APP_DIR" ]; then
+            echo "Error: Cannot find darwin app directory in dist"
+            ls -la dist
+            exit 1
+          fi
+          echo "Found app directory: $APP_DIR"
           cd dist
-          zip -r "../会议室预订系统-macos-x64.zip" "会议室预订系统-darwin-x64"
+          zip -r "../会议室预订系统-macos-x64.zip" "$(basename "$APP_DIR")"
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
