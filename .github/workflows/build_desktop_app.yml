@@ -65,11 +65,23 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           if [ "${{ matrix.platform }}" = "macos" ]; then
-            npx electron-builder --mac --${{ matrix.arch }}
+            if [ "${{ github.event_name }}" = "release" ]; then
+              npx electron-builder --mac --${{ matrix.arch }}
+            else
+              npx electron-builder --mac --${{ matrix.arch }} --publish never
+            fi
           elif [ "${{ matrix.platform }}" = "linux" ]; then
-            npx electron-builder --linux --${{ matrix.arch }}
+            if [ "${{ github.event_name }}" = "release" ]; then
+              npx electron-builder --linux --${{ matrix.arch }}
+            else
+              npx electron-builder --linux --${{ matrix.arch }} --publish never
+            fi
           else
-            npx electron-builder --win --x64
+            if [ "${{ github.event_name }}" = "release" ]; then
+              npx electron-builder --win --x64
+            else
+              npx electron-builder --win --x64 --publish never
+            fi
           fi
         shell: bash
 

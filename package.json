@@ -109,7 +109,7 @@
     },
     "publish": {
       "provider": "github",
-      "owner": "your-username",
+      "owner": "Dhgaj",
       "repo": "Conference-Room-Reservation-System"
     }
   }
