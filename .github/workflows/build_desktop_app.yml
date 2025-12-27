@@ -12,6 +12,9 @@ on:
     types: [published]
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   build:
     strategy:
@@ -51,8 +54,15 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      # 设置 GitHub Token
+      - name: Set GitHub Token
+        run: echo "GH_TOKEN=${{ secrets.GITHUB_TOKEN }}" >> $GITHUB_ENV
+        shell: bash
+
       # 构建应用
       - name: Build app
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           if [ "${{ matrix.platform }}" = "macos" ]; then
             npx electron-builder --mac --${{ matrix.arch }}
