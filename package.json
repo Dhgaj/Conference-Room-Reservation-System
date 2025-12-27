@@ -1,0 +1,117 @@
+{
+  "name": "meeting-room-desktop",
+  "version": "1.0.0",
+  "description": "会议室预订系统桌面版",
+  "author": "Your Name",
+  "main": "electron/main.js",
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder",
+    "dist:mac": "electron-builder --mac",
+    "dist:win": "electron-builder --win",
+    "dist:linux": "electron-builder --linux",
+    "dist:mac-arm64": "electron-builder --mac --arm64",
+    "dist:mac-x64": "electron-builder --mac --x64",
+    "dist:win-x64": "electron-builder --win --x64",
+    "dist:linux-appimage": "electron-builder --linux AppImage",
+    "dist:linux-deb": "electron-builder --linux deb",
+    "dist:linux-rpm": "electron-builder --linux rpm"
+  },
+  "devDependencies": {
+    "electron": "^35.7.5",
+    "electron-builder": "^24.13.3"
+  },
+  "build": {
+    "appId": "com.yourcompany.meetingroom",
+    "productName": "会议室预订系统",
+    "copyright": "Copyright © 2024",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "electron/**/*",
+      "static/**/*"
+    ],
+    "mac": {
+      "target": [
+        {
+          "target": "dmg",
+          "arch": ["x64", "arm64"]
+        }
+      ],
+      "icon": "static/favicon.icns",
+      "category": "public.app-category.productivity",
+      "hardenedRuntime": true,
+      "gatekeeperAssess": false,
+      "entitlements": "build/entitlements.mac.plist",
+      "entitlementsInherit": "build/entitlements.mac.plist"
+    },
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": ["x64"]
+        }
+      ],
+      "icon": "static/favicon.ico",
+      "artifactName": "${productName}-Setup-${version}.${ext}"
+    },
+    "linux": {
+      "target": [
+        {
+          "target": "AppImage",
+          "arch": ["x64", "arm64"]
+        },
+        {
+          "target": "deb",
+          "arch": ["x64", "arm64"]
+        },
+        {
+          "target": "rpm",
+          "arch": ["x64"]
+        }
+      ],
+      "icon": "static/icon-512.png",
+      "category": "Office",
+      "maintainer": "Your Name",
+      "vendor": "Your Company",
+      "synopsis": "会议室预订系统",
+      "description": "会议室预订系统桌面版"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "perMachine": false,
+      "allowElevation": true,
+      "runAfterFinish": true,
+      "installerIcon": "static/favicon.ico",
+      "uninstallerIcon": "static/favicon.ico",
+      "installerHeaderIcon": "static/icon-256.png",
+      "deleteAppDataOnUninstall": false,
+      "license": null,
+      "packElevateHelper": true
+    },
+    "dmg": {
+      "contents": [
+        {
+          "x": 130,
+          "y": 220
+        },
+        {
+          "x": 410,
+          "y": 220,
+          "type": "link",
+          "path": "/Applications"
+        }
+      ]
+    },
+    "publish": {
+      "provider": "github",
+      "owner": "your-username",
+      "repo": "Conference-Room-Reservation-System"
+    }
+  }
+}
+

@@ -2,11 +2,12 @@ name: Build Desktop App
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]
     paths:
       - '.github/workflows/build_desktop_app.yml'
-      - 'static/**'
+      - 'electron/**'
+      - 'package.json'
+      - 'package-lock.json'
   release:
     types: [published]
   workflow_dispatch:
@@ -17,92 +18,61 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - platform: windows
-            os: windows-latest
-            icon: static/favicon.ico
+          - os: windows-latest
+            platform: windows
             arch: x64
-            ext: exe
-          - platform: darwin
-            os: macos-latest
-            icon: static/favicon.icns
+          - os: macos-latest
+            platform: macos
             arch: x64
-            ext: app
-          - platform: darwin
-            os: macos-latest
-            icon: static/favicon.icns
+          - os: macos-latest
+            platform: macos
             arch: arm64
-            ext: app
+          - os: ubuntu-latest
+            platform: linux
+            arch: x64
+          - os: ubuntu-latest
+            platform: linux
+            arch: arm64
 
     runs-on: ${{ matrix.os }}
-    
+
     steps:
+      # 拉取代码
       - name: Checkout
         uses: actions/checkout@v4
 
+      # Node.js（Electron 官方推荐）
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
 
-      - name: Install Nativefier
-        run: npm install -g nativefier
+      # 安装依赖
+      - name: Install dependencies
+        run: npm ci
 
-      - name: Build Desktop App
-        shell: bash
+      # 构建应用
+      - name: Build app
         run: |
-          nativefier "https://liansifanfan.pythonanywhere.com" \
-            --name "会议室预订系统" \
-            --icon "${{ matrix.icon }}" \
-            --platform "${{ matrix.platform }}" \
-            --arch ${{ matrix.arch }} \
-            --electron-version 28.0.0 \
-            --single-instance \
-            --internal-urls ".*liansifanfan\.pythonanywhere\.com.*" \
-            --user-agent "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36" \
-            --clear-cache \
-            --file-download-options '{"saveAs": true}' \
-            --output dist
-
-      - name: List build output
-        run: |
-          echo "Current directory:"
-          ls -la
-        shell: bash
-
-      - name: Archive artifacts (Windows)
-        if: matrix.platform == 'windows'
-        run: |
-          # 在当前目录查找生成的 app 目录（nativefier 可能不使用 --output 指定的目录）
-          $appDir = Get-ChildItem -Path "." -Directory | Where-Object { $_.Name -like "*win32*" } | Select-Object -First 1
-          if (-not $appDir) {
-            Write-Host "Error: Cannot find win32 app directory"
-            Get-ChildItem -Path "."
-            exit 1
-          }
-          Write-Host "Found app directory: $($appDir.FullName)"
-          Compress-Archive -Path $appDir.FullName -DestinationPath "会议室预订系统-windows-x64.zip"
-
-      - name: Archive artifacts (macOS)
-        if: matrix.platform == 'darwin'
-        run: |
-          # 在当前目录查找生成的 app 目录（nativefier 可能不使用 --output 指定的目录）
-          APP_DIR=$(find . -maxdepth 1 -type d -name "*darwin*" | head -1)
-          if [ -z "$APP_DIR" ]; then
-            echo "Error: Cannot find darwin app directory"
-            ls -la
-            exit 1
+          if [ "${{ matrix.platform }}" = "macos" ]; then
+            npx electron-builder --mac --${{ matrix.arch }}
+          elif [ "${{ matrix.platform }}" = "linux" ]; then
+            npx electron-builder --linux --${{ matrix.arch }}
+          else
+            npx electron-builder --win --x64
           fi
-          echo "Found app directory: $APP_DIR"
-          zip -r "会议室预订系统-macos-${{ matrix.arch }}.zip" "$APP_DIR"
+        shell: bash
 
+      # 上传构建产物
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
           name: desktop-app-${{ matrix.platform }}-${{ matrix.arch }}
-          path: 会议室预订系统-*.zip
+          path: dist/*
 
+      # 发布到 Release
       - name: Publish to Release
         if: github.event_name == 'release'
         uses: softprops/action-gh-release@v2
         with:
-          files: 会议室预订系统-*.zip
+          files: dist/*
