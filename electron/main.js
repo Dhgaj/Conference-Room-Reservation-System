@@ -1,4 +1,5 @@
 const { app, BrowserWindow, session } = require('electron');
+const path = require('path');
 
 const gotTheLock = app.requestSingleInstanceLock();
 
@@ -30,32 +31,42 @@ if (!gotTheLock) {
       }
     );
 
+    const baseUrl = process.env.APP_URL;
+
+    if (!baseUrl) {
+      console.error('Error: APP_URL environment variable is not set');
+      app.quit();
+      return;
+    }
+
     const win = new BrowserWindow({
       width: 1200,
       height: 800,
       webPreferences: {
         session: persistentSession,
         contextIsolation: true,
-        nodeIntegration: false
+        nodeIntegration: false,
+        webSecurity: true,
+        preload: path.join(__dirname, 'preload.js')
       }
     });
 
     persistentSession.cookies
-      .get({ domain: 'liansifanfan.pythonanywhere.com' })
+      .get({ domain: new URL(baseUrl).hostname })
       .then((cookies) => {
         const isLoggedIn = cookies.some(
           (cookie) => cookie.name === 'sessionid'
         );
 
         if (isLoggedIn) {
-          win.loadURL('https://liansifanfan.pythonanywhere.com/');
+          win.loadURL(baseUrl);
         } else {
-          win.loadURL('https://liansifanfan.pythonanywhere.com/login');
+          win.loadURL(`${baseUrl}/login`);
         }
       })
       .catch((err) => {
         console.error('Failed to read cookies:', err);
-        win.loadURL('https://liansifanfan.pythonanywhere.com/login');
+        win.loadURL(`${baseUrl}/login`);
       });
   }
 

@@ -6,9 +6,6 @@
 
 一个会议室预订管理系统，可高效管理会议室资源。
 
-> [!WARNING]  
-> 现托管于 PythonAnywhere 配置方法见最后 客户端软件现时已不支持
-
 ## 功能特点
 
 - 便捷的会议室预订
@@ -18,11 +15,15 @@
 - 快速直观查看可用会议室
 - 会议室使用统计
 - 简单直观的操作界面
+- 密码哈希存储
+- CSRF 保护
+- API 速率限制
+- 安全 Cookie 配置
 
 ## 微信扫码使用
 
 1. 打开微信，扫描下方二维码
-2. 访问“会议室预订”功能
+2. 访问"会议室预订"功能
 3. 按照需求进行预订
 
 <img src="Releases/qrcode.png" alt="微信二维码" width="170">
@@ -59,6 +60,75 @@
 2. 解压文件
 3. 将应用程序拖入 Applications 文件夹
 
+## 本地开发
+
+### 环境要求
+
+- Python 3.8 或更高版本
+- pip
+
+### 安装步骤
+
+1. 克隆仓库
+   ```bash
+   git clone https://github.com/Dhgaj/Conference-Room-Reservation-System.git
+   cd Conference-Room-Reservation-System
+   ```
+
+2. 创建虚拟环境
+   ```bash
+   python -m venv .venv
+   source .venv/bin/activate  # Linux/macOS
+   # 或
+   .venv\Scripts\activate  # Windows
+   ```
+
+3. 安装依赖
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+4. 配置环境变量
+   ```bash
+   cp .env.example .env
+   ```
+   
+   编辑 `.env` 文件，设置必要的环境变量：
+   ```env
+   SECRET_KEY=your-secret-key-here
+   DATABASE_URI=sqlite:///meeting_rooms.db
+   SESSION_COOKIE_SECURE=False
+   REMEMBER_COOKIE_SECURE=False
+   FLASK_ENV=development
+   FLASK_DEBUG=True
+   APP_URL=http://localhost:5000
+   ```
+
+5. 初始化数据库
+   ```bash
+   python init_db.py
+   ```
+
+6. 运行应用
+   ```bash
+   python app.py
+   ```
+
+7. 访问应用
+   打开浏览器访问 `http://localhost:5000`
+
+### 环境变量说明
+
+| 变量 | 说明 | 开发环境 | 生产环境 |
+|------|------|---------|---------|
+| `SECRET_KEY` | Flask 应用密钥 | 任意字符串 | 强随机密钥 |
+| `DATABASE_URI` | 数据库连接字符串 | `sqlite:///meeting_rooms.db` | 生产数据库 |
+| `SESSION_COOKIE_SECURE` | Session Cookie 安全 | `False` | `True` |
+| `REMEMBER_COOKIE_SECURE` | 记住我 Cookie 安全 | `False` | `True` |
+| `FLASK_ENV` | Flask 环境 | `development` | `production` |
+| `FLASK_DEBUG` | 调试模式 | `True` | `False` |
+| `APP_URL` | 应用 URL | `http://localhost:5000` | 实际域名 |
+
 ## 使用说明
 
 1. 启动应用程序
@@ -81,6 +151,15 @@
 - 用户权限管理
 - 预订记录查询
 - 使用情况统计
+
+## 安全特性
+
+- **密码哈希存储**：使用 PBKDF2 算法加密存储用户密码
+- **CSRF 保护**：所有表单请求都受 CSRF 保护
+- **速率限制**：API 端点实施速率限制防止滥用
+- **安全 Cookie**：HttpOnly、Secure、SameSite 属性保护
+- **内容安全策略**：实施 CSP 防止 XSS 攻击
+- **环境变量管理**：敏感配置通过环境变量管理
 
 ## 技术支持
 
@@ -121,57 +200,82 @@
    pip install -r requirements.txt
    ```
 
-6. 设置防火墙
+6. 配置环境变量
+
+   ```sh
+   cp .env.example .env.production
+   nano .env.production
+   ```
+
+   设置生产环境配置：
+   ```env
+   SECRET_KEY=your-production-secret-key
+   DATABASE_URI=sqlite:///meeting_rooms.db
+   SESSION_COOKIE_SECURE=True
+   REMEMBER_COOKIE_SECURE=True
+   FLASK_ENV=production
+   FLASK_DEBUG=False
+   APP_URL=https://your-domain.com
+   ```
+
+7. 初始化数据库
+
+   ```sh
+   export FLASK_ENV=production
+   python init_db.py
+   ```
+
+8. 设置防火墙
 
    ```sh
    sudo ufw allow 'Nginx Full' #(开放目的端口即可)
    sudo ufw enable
    ```
 
-7. 配置域名（可选）  
+9. 配置域名（可选）  
    如果你有域名，可以将域名指向你的云服务器 IP，并在 Nginx 配置中设置 server_name 为你的域名
 
-8. 配置 SSL（可选）
+10. 配置 SSL（可选）
 
-   ```sh
-   sudo apt install certbot python3-certbot-nginx
-   sudo certbot --nginx -d DOMAIN
-   ```
+    ```sh
+    sudo apt install certbot python3-certbot-nginx
+    sudo certbot --nginx -d DOMAIN
+    ```
 
-9. 编辑 Nginx 配置文件
+11. 编辑 Nginx 配置文件
 
-   ```sh
-   nano /etc/nginx/sites-available/webapp
-   ```
+    ```sh
+    nano /etc/nginx/sites-available/webapp
+    ```
 
-   ```sh
-   server {
-   listen 80;
-   server_name DOMAIN;
-   return 301 https://$server_name$request_uri;
-   }
+    ```sh
+    server {
+    listen 80;
+    server_name DOMAIN;
+    return 301 https://$server_name$request_uri;
+    }
 
-   server {
-   listen 443 ssl;
-   server_name DOMAIN;
+    server {
+    listen 443 ssl;
+    server_name DOMAIN;
 
-       ssl_certificate /etc/letsencrypt/live/DOMAIN/fullchain.pem;
-       ssl_certificate_key /etc/letsencrypt/live/DOMAIN/privkey.pem;
+        ssl_certificate /etc/letsencrypt/live/DOMAIN/fullchain.pem;
+        ssl_certificate_key /etc/letsencrypt/live/DOMAIN/privkey.pem;
 
-       ssl_protocols TLSv1.2 TLSv1.3;
-       ssl_ciphers HIGH:!aNULL:!MD5;
+        ssl_protocols TLSv1.2 TLSv1.3;
+        ssl_ciphers HIGH:!aNULL:!MD5;
 
-       location / {
-           proxy_pass http://unix:/tmp/gunicorn.sock;
-           proxy_set_header Host $host;
-           proxy_set_header X-Real-IP $remote_addr;
-           proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-           proxy_set_header X-Forwarded-Proto $scheme;
-           root /var/www/webapp;
-       }
-   ```
+        location / {
+            proxy_pass http://unix:/tmp/gunicorn.sock;
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+            root /var/www/webapp;
+        }
+    ```
 
-10. 编辑 Nginx 启用配置文件
+12. 编辑 Nginx 启用配置文件
 
     ```sh
     nano /etc/nginx/sites-enabled/webapp
@@ -206,13 +310,13 @@
     }
     ```
 
-11. 创建一个符号链接到 sites-enabled 目录
+13. 创建一个符号链接到 sites-enabled 目录
 
     ```sh
     sudo ln -s /etc/nginx/sites-available/webapp /etc/nginx/sites-enabled/webapp
     ```
 
-12. 测试 Nginx 配置是否正确
+14. 测试 Nginx 配置是否正确
 
     ```sh
     sudo nginx -t
@@ -224,7 +328,7 @@
     nginx: configuration file /etc/nginx/nginx.conf test is successful
     ```
 
-13. 创建编辑 Gunicorn 服务文件
+15. 创建编辑 Gunicorn 服务文件
 
     ```sh
     nano /etc/systemd/system/gunicorn.service
@@ -246,7 +350,7 @@
     WantedBy=multi-user.target
     ```
 
-14. 启动并启用 Nginx 和 Gunicorn 服务
+16. 启动并启用 Nginx 和 Gunicorn 服务
 
     ```sh
     # 启动 Nginx
@@ -288,7 +392,32 @@
     pip install -r requirements.txt
     ```
 
-### 4. 配置 Web 应用设置
+### 4. 配置环境变量
+- 在 PythonAnywhere 的 Bash Console 中运行：
+    ```
+    cp .env.example .env.production
+    nano .env.production
+    ```
+    
+    设置生产环境配置：
+    ```env
+    SECRET_KEY=your-production-secret-key
+    DATABASE_URI=sqlite:///meeting_rooms.db
+    SESSION_COOKIE_SECURE=True
+    REMEMBER_COOKIE_SECURE=True
+    FLASK_ENV=production
+    FLASK_DEBUG=False
+    APP_URL=https://yourname.pythonanywhere.com
+    ```
+
+### 5. 初始化数据库
+- 在 PythonAnywhere 的 Bash Console 中运行：
+    ```
+    export FLASK_ENV=production
+    python init_db.py
+    ```
+
+### 6. 配置 Web 应用设置
 - 在 Web 页面中设置以下内容：
     ```
     Source code: /home/[您的用户名]/[文件目录名]
@@ -296,7 +425,7 @@
     Virtual environment: /home/[您的用户名]/[文件目录名]/.venv
     ```
 
-### 5. 配置 WSGI 文件
+### 7. 配置 WSGI 文件
 - 点击 WSGI configuration file 链接，修改内容为：  
     ```
     import sys
@@ -315,6 +444,6 @@
         os.makedirs(instance_path)
     ```
 
-### 6. The Last
+### 8. The Last
 - 在 Web 页面点击 "Reload" 按钮
 * 访问您的网站 [您的用户名].pythonanywhere.com

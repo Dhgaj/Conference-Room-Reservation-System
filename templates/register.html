@@ -10,6 +10,7 @@
           method="POST"
           id="registerForm"
           onsubmit="return validateForm()">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
           <div class="mb-3">
             <label
               for="username"
@@ -75,7 +76,6 @@
 </div>
 
 <script>
-  // 检查密码是否匹配
   function checkPasswordMatch() {
     const password = document.getElementById("password").value;
     const confirmPassword = document.getElementById("confirm_password").value;
@@ -99,7 +99,6 @@
     }
   }
 
-  // 验证表单
   function validateForm() {
     const password = document.getElementById("password").value;
     const confirmPassword = document.getElementById("confirm_password").value;
@@ -117,7 +116,6 @@
     return true;
   }
 
-  // 页面加载时禁用提交按钮，直到密码匹配
   document.addEventListener("DOMContentLoaded", function () {
     const submitBtn = document.getElementById("submitBtn");
     submitBtn.disabled = true;

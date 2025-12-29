@@ -55,27 +55,47 @@ from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime, timedelta
 from flask import Flask, render_template, request, redirect, url_for, flash, jsonify
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
+from werkzeug.security import generate_password_hash, check_password_hash
+from flask_wtf.csrf import CSRFProtect
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
+from dotenv import load_dotenv
 
-# 创建 Flask 应用实例
+env = os.getenv('FLASK_ENV', 'development')
+if env == 'production':
+    load_dotenv('.env.production')
+else:
+    load_dotenv()
+
 app = Flask(__name__)
-# 配置 Flask 应用的密钥
-app.config['SECRET_KEY'] = 'p@ssw0rd'
-# 配置 SQLAlchemy 数据库 URI
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///meeting_rooms.db'
 
-# 添加安全相关配置
-# 启用安全的会话 Cookie
-app.config['SESSION_COOKIE_SECURE'] = True
-# 启用安全的记住我 Cookie
-app.config['REMEMBER_COOKIE_SECURE'] = True
-# 启用 HttpOnly 会话 Cookie
+app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', os.urandom(32))
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URI', 'sqlite:///meeting_rooms.db')
+
+app.config['SESSION_COOKIE_SECURE'] = os.getenv('SESSION_COOKIE_SECURE', 'False').lower() == 'true'
+app.config['REMEMBER_COOKIE_SECURE'] = os.getenv('REMEMBER_COOKIE_SECURE', 'False').lower() == 'true'
 app.config['SESSION_COOKIE_HTTPONLY'] = True
-# 初始化数据库实例
+app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
+
 db = SQLAlchemy(app)
-# 初始化 Flask-Login 管理器
 login_manager = LoginManager(app)
-# 设置登录视图的端点
 login_manager.login_view = 'login'
+csrf = CSRFProtect(app)
+
+limiter = Limiter(
+    app=app,
+    key_func=get_remote_address,
+    default_limits=["200 per day", "50 per hour"]
+)
+
+@app.after_request
+def security_headers(response):
+    response.headers['X-Content-Type-Options'] = 'nosniff'
+    response.headers['X-Frame-Options'] = 'SAMEORIGIN'
+    response.headers['X-XSS-Protection'] = '1; mode=block'
+    response.headers['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains'
+    response.headers['Content-Security-Policy'] = "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:;"
+    return response
 
 # 设置允许的最大会议数量
 MAX_TOTAL_MEETINGS = 100
@@ -153,38 +173,17 @@ def check_room_availability(room_id, start_time, end_time, exclude_reservation_i
 
 
 class User(UserMixin, db.Model):
-    """
-    用户类，继承自UserMixin和db.Model
-    属性:
-        id (int): 用户ID,主键
-        username (str): 用户名，唯一且不能为空
-        password (str): 密码，不能为空
-        is_admin (bool): 是否为管理员,默认值为False
-        reservations (list): 用户的预订关系
-    方法:
-        set_password(password):
-            设置用户密码
-        check_password(password):
-            检查用户密码是否正确
-    """
-    # 用户ID，主键
     id = db.Column(db.Integer, primary_key=True)
-    # 用户名，唯一且不能为空
     username = db.Column(db.String(80), unique=True, nullable=False)
-    # 密码，不能为空
-    password = db.Column(db.String(120), nullable=False)
-    # 是否为管理员，默认值为False
+    password = db.Column(db.String(255), nullable=False)
     is_admin = db.Column(db.Boolean, default=False)
-    # 用户的预订关系
     reservations = db.relationship('Reservation', backref='user', lazy=True)
 
     def set_password(self, password):
-        # 设置用户密码
-        self.password = password
+        self.password = generate_password_hash(password)
 
     def check_password(self, password):
-        # 检查用户密码是否正确
-        return self.password == password
+        return check_password_hash(self.password, password)
 
 
 class Room(db.Model):
@@ -268,21 +267,16 @@ def index():
 
 
 @app.route('/login', methods=['GET', 'POST'])
+@limiter.limit("10 per minute")
 def login():
-    """
-    用户登录的路由。
-    该函数执行以下操作：
-    1. 如果请求方法为POST，获取并验证表单数据。
-    2. 根据用户名查询用户信息。
-    3. 检查用户是否存在以及密码是否正确。
-    4. 如果验证通过，登录用户并重定向到仪表盘。
-    5. 如果验证失败，显示错误消息。
-    返回:
-        werkzeug.wrappers.Response: 渲染登录页面或重定向到仪表盘的响应对象。
-    """
     if request.method == 'POST':
-        username = request.form.get('username')
-        password = request.form.get('password')
+        username = request.form.get('username', '').strip()
+        password = request.form.get('password', '')
+
+        if not username or not password:
+            flash('用户名和密码不能为空')
+            return render_template('login.html')
+
         user = User.query.filter_by(username=username).first()
 
         if user and user.check_password(password):
